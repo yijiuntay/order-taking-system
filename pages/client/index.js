@@ -1,27 +1,45 @@
 import Head from "next/head";
 import styles from "@/styles/ClientHome.module.css";
 import { useState } from "react";
+import produce from "immer";
+import _ from "lodash";
 
 export default function ClientHome() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState({});
 
   const handleAddOrderItem = async (e) => {
     e.preventDefault();
-    let tmpOrderIndex = orders.findIndex(
-      (o) => o.itemName === e.target.orderItem.value.toLowerCase()
+    let orderItemLower = e.target.orderItem.value.toLowerCase();
+    setOrders(
+      produce((draft) => {
+        if (Object.hasOwn(draft, orderItemLower)) {
+          draft[orderItemLower]++;
+        } else {
+          draft[orderItemLower] = 1;
+        }
+      })
     );
-    if (tmpOrderIndex === -1) {
-      setOrders([
-        ...orders,
-        { itemName: e.target.orderItem.value.toLowerCase(), quantity: 1 },
-      ]);
-    } else {
-      let updatedOrders = [...orders];
-      updatedOrders[tmpOrderIndex].quantity =
-        updatedOrders[tmpOrderIndex].quantity + 1;
-      setOrders(updatedOrders);
-    }
     document.getElementsByName("orderForm")[0].reset();
+  };
+
+  const handleIncrement = (key) => {
+    setOrders(
+      produce((draft) => {
+        draft[key]++;
+      })
+    );
+  };
+
+  const handleDecrement = (key) => {
+    setOrders(
+      produce((draft) => {
+        if (draft[key] === 1) {
+          delete draft[key];
+        } else {
+          draft[key]--;
+        }
+      })
+    );
   };
 
   return (
@@ -57,16 +75,33 @@ export default function ClientHome() {
           </form>
         </div>
         <div className={styles.displaySection}>
-          {orders.length > 0 ? (
-            orders.map((o, i) => (
-              <div key={i} className={styles.eachOrderDisplay}>
-                <label className={styles.eachOrderItemName}>{o.itemName}</label>
-                <label>x{o.quantity}</label>
+          {!_.isEmpty(orders) ? (
+            Object.entries(orders).map(([key, value]) => (
+              <div key={key} className={styles.eachOrderDisplay}>
+                <label className={styles.eachOrderItemName}>{key}</label>
+                <div className={styles.addRemoveButtons}>
+                  <label>x{value}</label>
+                  <button
+                    className={styles.eachButton}
+                    onClick={() => handleDecrement(key)}
+                  >
+                    -
+                  </button>
+                  <button
+                    className={styles.eachButton}
+                    onClick={() => handleIncrement(key)}
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             ))
           ) : (
             <h1>No order item added yet</h1>
           )}
+        </div>
+        <div className={styles.submitButtonSection}>
+          <button className={styles.submitButton}>Submit Order</button>
         </div>
       </main>
     </>

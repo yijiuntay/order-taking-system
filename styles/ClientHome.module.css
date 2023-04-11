@@ -28,7 +28,6 @@
 }
 
 .submitButton {
-  width: min-content;
   padding: 5px;
 }
 
@@ -40,6 +39,7 @@
   width: 70%;
   height: 30vh;
   color: black;
+  gap: 5px;
 }
 
 .eachOrderDisplay {
@@ -49,4 +49,19 @@
 
 .eachOrderItemName {
   max-width: 80%;
+}
+
+.addRemoveButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.eachButton {
+  min-width: 20px;
+}
+
+.submitButtonSection {
+  display: flex;
+  width: 70%;
+  justify-content: end;
 }
