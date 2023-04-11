@@ -63,5 +63,5 @@
 .submitButtonSection {
   display: flex;
   width: 70%;
-  justify-content: end;
+  justify-content: flex-end;
 }
