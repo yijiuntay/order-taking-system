@@ -3,6 +3,7 @@ import styles from "@/styles/ClientHome.module.css";
 import { useState } from "react";
 import produce from "immer";
 import _ from "lodash";
+import fetch from "isomorphic-unfetch";
 
 export default function ClientHome() {
   const [orders, setOrders] = useState({});
@@ -42,6 +43,21 @@ export default function ClientHome() {
     );
   };
 
+  const submitOrder = async () => {
+    let orderBody = produce(orders, (draft) => {
+      draft["tableNo"] = 1;
+    });
+    try {
+      const res = await fetch("/api/hello", {
+        method: "post",
+        body: JSON.stringify(orderBody),
+      });
+    } catch (error) {
+      console.log("submit order error", error);
+      console.dir(error);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -56,7 +72,7 @@ export default function ClientHome() {
           <form
             className={styles.orderForm}
             name="orderForm"
-            autocomplete="off"
+            autoComplete="off"
             onSubmit={handleAddOrderItem}
           >
             <input
@@ -101,7 +117,9 @@ export default function ClientHome() {
           )}
         </div>
         <div className={styles.submitButtonSection}>
-          <button className={styles.submitButton}>Submit Order</button>
+          <button className={styles.submitButton} onClick={submitOrder}>
+            Submit Order
+          </button>
         </div>
       </main>
     </>
