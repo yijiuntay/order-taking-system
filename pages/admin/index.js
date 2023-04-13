@@ -5,7 +5,23 @@ import useSWR from "swr";
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 export default function AdminHome() {
-  const { data, error, isLoading } = useSWR("/api/admin", fetcher);
+  const { data, error, isLoading, mutate } = useSWR("/api/admin/get", fetcher);
+
+  const handleMarkDone = async (id) => {
+    let reqBody = {
+      id: id,
+    };
+    try {
+      const res = await fetch("/api/admin/markDone", {
+        method: "post",
+        body: JSON.stringify(reqBody),
+      });
+      mutate();
+    } catch (error) {
+      console.log("mark done error", error);
+      console.dir(error);
+    }
+  };
 
   return (
     <>
@@ -36,6 +52,7 @@ export default function AdminHome() {
                     </div>
                   ))}
                 </div>
+                <button onClick={() => handleMarkDone(_id)}>Mark Done</button>
               </div>
             ))
           )}
