@@ -44,11 +44,13 @@ export default function ClientHome() {
   };
 
   const submitOrder = async () => {
-    let orderBody = produce(orders, (draft) => {
+    let orderBody = produce({}, (draft) => {
       draft["tableNo"] = 1;
+      draft["orders"] = orders;
     });
+    console.log("hey", orderBody);
     try {
-      const res = await fetch("/api/hello", {
+      const res = await fetch("/api/client", {
         method: "post",
         body: JSON.stringify(orderBody),
       });
