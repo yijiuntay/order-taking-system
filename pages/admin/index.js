@@ -12,30 +12,36 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import signOut from "../../firebase/auth/signout";
+import deleteData from "../../firebase/firestore/deleteData";
 
 //const fetcher = (...args) => fetch(...args).then((res) => res.json());
+const db = getFirestore(firebase_app);
+const dbQuery = query(collection(db, "orders"));
 
 export default function AdminHome() {
   const { user } = useAuthContext();
   const router = useRouter();
   //const { data, error, isLoading, mutate } = useSWR("/api/admin/get", fetcher);
-  const db = getFirestore(firebase_app);
-  const dbQuery = query(collection(db, "orders"));
+
   const [data, setData] = React.useState([]);
 
   const handleMarkDone = async (id) => {
-    let reqBody = {
-      id: id,
-    };
-    try {
-      const res = await fetch("/api/admin/markDone", {
-        method: "post",
-        body: JSON.stringify(reqBody),
-      });
-      //mutate();
-    } catch (error) {
-      console.log("mark done error", error);
-      console.dir(error);
+    //let reqBody = {
+    //  id: id,
+    //};
+    //try {
+    //  const res = await fetch("/api/admin/markDone", {
+    //    method: "post",
+    //    body: JSON.stringify(reqBody),
+    //  });
+    //mutate();
+    //} catch (error) {
+    //  console.log("mark done error", error);
+    //  console.dir(error);
+    //}
+    const { result, error } = await deleteData("orders", id);
+    if (error) {
+      return console.log(error);
     }
   };
 
@@ -49,7 +55,7 @@ export default function AdminHome() {
       (snapshot) => {
         let newData = [];
         snapshot.forEach((doc) => {
-          newData.push(doc.data());
+          newData.push({ id: doc.id, ...doc.data() });
         });
         setData(newData);
       },
@@ -71,8 +77,8 @@ export default function AdminHome() {
           <button onClick={signOut}>Sign Out</button>
         </div>
         <div className={styles.orderGridContainer}>
-          {data.map(({ _id, tableNo, orders }) => (
-            <div className={styles.orderGridItem} key={_id}>
+          {data.map(({ id, tableNo, orders }) => (
+            <div className={styles.orderGridItem} key={id}>
               <label>Table #{tableNo}</label>
               <div className={styles.orderList}>
                 {Object.entries(orders).map(([key, value]) => (
@@ -82,7 +88,7 @@ export default function AdminHome() {
                   </div>
                 ))}
               </div>
-              <button onClick={() => handleMarkDone(_id)}>Mark Done</button>
+              <button onClick={() => handleMarkDone(id)}>Mark Done</button>
             </div>
           ))}
         </div>
