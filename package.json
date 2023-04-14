@@ -12,6 +12,7 @@
     "@next/font": "13.2.4",
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
+    "firebase": "^9.19.1",
     "immer": "^9.0.21",
     "isomorphic-unfetch": "^4.0.2",
     "lodash": "^4.17.21",
