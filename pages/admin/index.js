@@ -11,6 +11,7 @@ import {
   query,
   onSnapshot,
 } from "firebase/firestore";
+import signOut from "../../firebase/auth/signout";
 
 //const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
@@ -67,6 +68,7 @@ export default function AdminHome() {
       <main className={styles.main}>
         <div>
           <h1>Orders</h1>
+          <button onClick={signOut}>Sign Out</button>
         </div>
         <div className={styles.orderGridContainer}>
           {data.map(({ _id, tableNo, orders }) => (
