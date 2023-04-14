@@ -1,11 +1,26 @@
 import Head from "next/head";
 import styles from "@/styles/AdminHome.module.css";
-import useSWR from "swr";
+//import useSWR from "swr";
+import React from "react";
+import { useAuthContext } from "../../src/context/AuthContext";
+import { useRouter } from "next/navigation";
+import firebase_app from "../../firebase/config";
+import {
+  getFirestore,
+  collection,
+  query,
+  onSnapshot,
+} from "firebase/firestore";
 
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
+//const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 export default function AdminHome() {
-  const { data, error, isLoading, mutate } = useSWR("/api/admin/get", fetcher);
+  const { user } = useAuthContext();
+  const router = useRouter();
+  //const { data, error, isLoading, mutate } = useSWR("/api/admin/get", fetcher);
+  const db = getFirestore(firebase_app);
+  const dbQuery = query(collection(db, "orders"));
+  const [data, setData] = React.useState([]);
 
   const handleMarkDone = async (id) => {
     let reqBody = {
@@ -16,12 +31,30 @@ export default function AdminHome() {
         method: "post",
         body: JSON.stringify(reqBody),
       });
-      mutate();
+      //mutate();
     } catch (error) {
       console.log("mark done error", error);
       console.dir(error);
     }
   };
+
+  React.useEffect(() => {
+    if (user === null) router.push("/signin");
+  }, [user]);
+
+  React.useEffect(() => {
+    const unsub = onSnapshot(
+      dbQuery,
+      (snapshot) => {
+        let newData = [];
+        snapshot.forEach((doc) => {
+          newData.push(doc.data());
+        });
+        setData(newData);
+      },
+      (error) => console.log(error)
+    );
+  }, []);
 
   return (
     <>
@@ -36,26 +69,20 @@ export default function AdminHome() {
           <h1>Orders</h1>
         </div>
         <div className={styles.orderGridContainer}>
-          {error ? (
-            <div>Failed to load</div>
-          ) : isLoading ? (
-            <div>Loading</div>
-          ) : (
-            data.map(({ _id, tableNo, orders }) => (
-              <div className={styles.orderGridItem} key={_id}>
-                <label>Table #{tableNo}</label>
-                <div className={styles.orderList}>
-                  {Object.entries(orders).map(([key, value]) => (
-                    <div className={styles.orderItem} key={key}>
-                      <label className={styles.orderItemName}>{key}</label>
-                      <label>x{value}</label>
-                    </div>
-                  ))}
-                </div>
-                <button onClick={() => handleMarkDone(_id)}>Mark Done</button>
+          {data.map(({ _id, tableNo, orders }) => (
+            <div className={styles.orderGridItem} key={_id}>
+              <label>Table #{tableNo}</label>
+              <div className={styles.orderList}>
+                {Object.entries(orders).map(([key, value]) => (
+                  <div className={styles.orderItem} key={key}>
+                    <label className={styles.orderItemName}>{key}</label>
+                    <label>x{value}</label>
+                  </div>
+                ))}
               </div>
-            ))
-          )}
+              <button onClick={() => handleMarkDone(_id)}>Mark Done</button>
+            </div>
+          ))}
         </div>
       </main>
     </>

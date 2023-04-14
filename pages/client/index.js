@@ -4,6 +4,7 @@ import { useState } from "react";
 import produce from "immer";
 import _ from "lodash";
 import fetch from "isomorphic-unfetch";
+import addData from "@/firebase/firestore/addData";
 
 export default function ClientHome() {
   const [orders, setOrders] = useState({});
@@ -44,18 +45,22 @@ export default function ClientHome() {
   };
 
   const submitOrder = async () => {
-    let reqBody = produce({}, (draft) => {
+    let data = produce({}, (draft) => {
       draft["tableNo"] = 1;
       draft["orders"] = orders;
     });
-    try {
-      const res = await fetch("/api/client", {
-        method: "post",
-        body: JSON.stringify(reqBody),
-      });
-    } catch (error) {
-      console.log("submit order error", error);
-      console.dir(error);
+    //try {
+    //  const res = await fetch("/api/client", {
+    //    method: "post",
+    //    body: JSON.stringify(reqBody),
+    //  });
+    //} catch (error) {
+    //  console.log("submit order error", error);
+    //  console.dir(error);
+    //}
+    const { result, error } = await addData("orders", data);
+    if (error) {
+      return console.log(error);
     }
   };
 
