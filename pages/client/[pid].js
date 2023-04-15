@@ -5,9 +5,12 @@ import produce from "immer";
 import _ from "lodash";
 import fetch from "isomorphic-unfetch";
 import addData from "@/firebase/firestore/addData";
+import { useRouter } from "next/router";
 
 export default function ClientHome() {
   const [orders, setOrders] = useState({});
+  const router = useRouter();
+  const { pid } = router.query;
 
   const handleAddOrderItem = async (e) => {
     e.preventDefault();
@@ -46,7 +49,8 @@ export default function ClientHome() {
 
   const submitOrder = async () => {
     let data = produce({}, (draft) => {
-      draft["tableNo"] = 1;
+      console.log(typeof pid);
+      draft["tableNo"] = pid;
       draft["orders"] = orders;
     });
     //try {
